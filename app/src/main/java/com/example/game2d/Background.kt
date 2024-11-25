@@ -10,4 +10,4 @@ class Background(val screenW:Int) {
         }
         x2 = x1 + screenW
     }
-}
+}//
