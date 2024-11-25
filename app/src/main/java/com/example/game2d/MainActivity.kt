@@ -32,6 +32,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +48,7 @@ class MainActivity : ComponentActivity() {
                     val screenW = resources.displayMetrics.widthPixels
                     val screenH = resources.displayMetrics.heightPixels
                     val scale = resources.displayMetrics.density
-                    val game = Game(GlobalScope,screenW,screenH, scale)
+                    val game = Game(GlobalScope,screenW,screenH, scale, this)
                     Start(m = Modifier.padding(innerPadding),game)
                 }
             }
@@ -110,18 +114,25 @@ fun Start(m: Modifier, game:Game){
             .offset { IntOffset(game.background.x2, 0) }
     )
 
+    if (msg == "遊戲暫停" && !game.isPlaying){
+        msg = "遊戲結束，按此按鍵重新開始遊戲"
+    }
+
     Row {
         Button(
             onClick = {
-                if (msg=="遊戲開始"){
+                if (msg=="遊戲開始"|| msg =="遊戲繼續"){
                     msg = "遊戲暫停"
                     game.Play()
                 }
-                else{
-                    msg = "遊戲開始"
+                else if (msg=="遊戲暫停"){
+                    msg = "遊戲繼續"
                     game.isPlaying = false
                 }
-
+                else{  //重新開始遊戲
+                    msg = "遊戲暫停"
+                    game.Restart()
+                }
             },
             modifier = m
         )
@@ -143,4 +154,21 @@ fun Start(m: Modifier, game:Game){
         }
         Text(text = counter2.toString(), modifier = m)
     }
+    val activity = (LocalContext.current as? Activity)
+    Box (
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomEnd
+    ){
+        Button(
+            onClick = {
+                game.mper1.stop()
+                game.mper2.stop()
+                activity?.finish()
+            }
+        ) {
+            Text("結束App")
+        }
+    }
+
 }
+
